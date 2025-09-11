@@ -19,6 +19,24 @@ local function PrintDebug(message)
     print("|cFF00FF00[FocusMacroMaker]|r " .. message)
 end
 
+-- Function to print party members
+local function PrintPartyMembers()
+    if not IsInGroup() then return end
+
+    for i = 1, GetNumSubgroupMembers() do
+        local unit = "party"..i
+        if UnitExists(unit) then
+            local name = GetUnitName(unit, true)
+            PrintDebug(name)
+        end
+    end
+end
+
+local function PrintPlayerCharacter()
+    local name, realm = UnitFullName("player")
+    PrintDebug(name .. "-" .. realm)
+end
+
 -- Main window creation
 local mainFrame = CreateFrame("Frame", "FocusMacroMakerMainFrame", UIParent, "BasicFrameTemplateWithInset")
 mainFrame:SetSize(500, 350)
@@ -59,7 +77,28 @@ focusIcon:SetPoint("LEFT", mainFrame.playerName, "RIGHT", 10, 0)
 focusIcon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
 SetRaidTargetIconTexture(focusIcon, 8) -- 8 = Skull
 
+-- buttons for debugging
+local partyButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+partyButton:SetSize(120, 30)
+partyButton:SetPoint("TOPLEFT", mainFrame.playerName, "BOTTOMLEFT", 0, -10)
+partyButton:SetText("Print Party [debug]")
+
+partyButton:SetScript("OnClick", function(self)
+    PrintPartyMembers()
+end)
+
+local characterButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
+characterButton:SetSize(120, 30)
+characterButton:SetPoint("TOPLEFT", mainFrame.playerName, "BOTTOMLEFT", 0, -50)
+characterButton:SetText("Print Self [debug]")
+
+characterButton:SetScript("OnClick", function(self)
+    PrintPlayerCharacter()
+end)
+
+
 PrintDebug("FocusMacroMaker loaded.")
+
 
 -- Slash commands
 SLASH_FOCUSMACROMAKER1 = "/focusmacromaker"
