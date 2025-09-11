@@ -1,0 +1,10 @@
+## Interface: 110200
+## Title: Focus Macro Maker
+## Notes: TODO
+## Version: 1.0.0
+## Author: TODO
+## X-Curse-Project-ID: 999999
+## SavedVariablesPerCharacter: FocusMacroMakerDB
+## SavedVariables:
+
+FocusMacroMaker.lua
