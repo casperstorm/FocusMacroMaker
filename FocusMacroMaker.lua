@@ -47,46 +47,17 @@ mainFrame:SetScript("OnHide", function()
     PlaySound(808)
 end)
 
+-- Text and button on same row
 mainFrame.playerName = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-mainFrame.playerName:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 15, -35)
+mainFrame.playerName:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 15, -45)
 mainFrame.playerName:SetText("Your focus marker")
 
--- Create marker buttons row
-local markerButtons = {}
-local buttonSize = 32
-local buttonSpacing = 5
-local startX = 15
-local startY = -60
-
-for i = 1, 8 do
-    local button = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-    button:SetSize(buttonSize, buttonSize)
-    button:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", startX + (i - 1) * (buttonSize + buttonSpacing), startY)
-
-    -- Set the raid target icon
-    local icon = button:CreateTexture(nil, "ARTWORK")
-    icon:SetAllPoints()
-    icon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-    SetRaidTargetIconTexture(icon, i)
-
-    -- Add tooltip
-    button:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText(TARGET_MARKERS[i], 1, 1, 1)
-        GameTooltip:Show()
-    end)
- 
-    button:SetScript("OnLeave", function(self)
-        GameTooltip:Hide()
-    end)
-
-    -- Add click functionality
-    button:SetScript("OnClick", function(self)
-        -- Save to db?
-    end)
-    
-    markerButtons[i] = button
-end
+-- focus icon (hardcoded for now)
+local focusIcon = mainFrame:CreateTexture(nil, "OVERLAY")
+focusIcon:SetSize(32, 32)
+focusIcon:SetPoint("LEFT", mainFrame.playerName, "RIGHT", 10, 0)
+focusIcon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+SetRaidTargetIconTexture(focusIcon, 8) -- 8 = Skull
 
 PrintDebug("FocusMacroMaker loaded.")
 
