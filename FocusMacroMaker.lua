@@ -24,7 +24,7 @@ local function PrintPartyMembers()
     if not IsInGroup() then return end
 
     for i = 1, GetNumSubgroupMembers() do
-        local unit = "party"..i
+        local unit = "party" .. i
         if UnitExists(unit) then
             local name = GetUnitName(unit, true)
             PrintDebug(name)
@@ -36,6 +36,20 @@ local function PrintPlayerCharacter()
     local name, realm = UnitFullName("player")
     PrintDebug(name .. "-" .. realm)
 end
+
+-- Event frame for party notifications
+local eventFrame = CreateFrame("Frame")
+eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+
+-- Event handler for party changes
+local function OnPartyEvent(self, event, ...)
+    if event == "GROUP_ROSTER_UPDATE" then
+        PrintDebug("Party roster updated")
+        PrintPartyMembers()
+    end
+end
+
+eventFrame:SetScript("OnEvent", OnPartyEvent)
 
 -- Main window creation
 local mainFrame = CreateFrame("Frame", "FocusMacroMakerMainFrame", UIParent, "BasicFrameTemplateWithInset")
