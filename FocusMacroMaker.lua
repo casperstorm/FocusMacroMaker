@@ -1,5 +1,7 @@
 if not FocusMacroMakerDB then
-    FocusMacroMakerDB = {}
+    FocusMacroMakerDB = {
+        marker = 1 -- Default to marker 1 (Star)
+    }
 end
 
 -- Target marker constants
@@ -19,37 +21,37 @@ local function PrintDebug(message)
     print("|cFF00FF00[FocusMacroMaker]|r " .. message)
 end
 
--- Function to print party members
-local function PrintPartyMembers()
-    if not IsInGroup() then return end
+local function indexOf(t, value)
+    for i, v in ipairs(t) do if v == value then return i end end
+end
 
+local function PlayerName()
+    local playerName, playerRealm = UnitFullName("player")
+    return (playerName .. "-" .. playerRealm)
+end
+
+local function SortPartyMembers()
+    local names = {}
+
+    -- Add player's own name
+    table.insert(names, PlayerName())
+
+    -- Add party members
     for i = 1, GetNumSubgroupMembers() do
         local unit = "party" .. i
         if UnitExists(unit) then
             local name = GetUnitName(unit, true)
-            PrintDebug(name)
+            if name then
+                table.insert(names, name)
+            end
         end
     end
+
+    -- Sort the array
+    table.sort(names)
+
+    return names
 end
-
-local function PrintPlayerCharacter()
-    local name, realm = UnitFullName("player")
-    PrintDebug(name .. "-" .. realm)
-end
-
--- Event frame for party notifications
-local eventFrame = CreateFrame("Frame")
-eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-
--- Event handler for party changes
-local function OnPartyEvent(self, event, ...)
-    if event == "GROUP_ROSTER_UPDATE" then
-        PrintDebug("Party roster updated")
-        PrintPartyMembers()
-    end
-end
-
-eventFrame:SetScript("OnEvent", OnPartyEvent)
 
 -- Main window creation
 local mainFrame = CreateFrame("Frame", "FocusMacroMakerMainFrame", UIParent, "BasicFrameTemplateWithInset")
@@ -89,27 +91,32 @@ local focusIcon = mainFrame:CreateTexture(nil, "OVERLAY")
 focusIcon:SetSize(32, 32)
 focusIcon:SetPoint("LEFT", mainFrame.playerName, "RIGHT", 10, 0)
 focusIcon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-SetRaidTargetIconTexture(focusIcon, 8) -- 8 = Skull
+SetRaidTargetIconTexture(focusIcon, FocusMacroMakerDB.marker)
 
--- buttons for debugging
-local partyButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-partyButton:SetSize(120, 30)
-partyButton:SetPoint("TOPLEFT", mainFrame.playerName, "BOTTOMLEFT", 0, -10)
-partyButton:SetText("Print Party [debug]")
+-- Function to update the focus icon
+local function UpdateFocusIcon()
+    SetRaidTargetIconTexture(focusIcon, FocusMacroMakerDB.marker)
+end
 
-partyButton:SetScript("OnClick", function(self)
-    PrintPartyMembers()
-end)
+-- Event frame for party notifications
+local eventFrame = CreateFrame("Frame")
+eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 
-local characterButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-characterButton:SetSize(120, 30)
-characterButton:SetPoint("TOPLEFT", mainFrame.playerName, "BOTTOMLEFT", 0, -50)
-characterButton:SetText("Print Self [debug]")
+-- Event handler for party changes
+local function OnPartyEvent(self, event, ...)
+    if event == "GROUP_ROSTER_UPDATE" then
+        local player = PlayerName();
+        local names = SortPartyMembers()
+        PrintDebug("Player: " .. player)
+        PrintDebug("Names: " .. table.concat(names, ", "))
+        local playerIndex = indexOf(names, player)
+        PrintDebug("Player index: " .. playerIndex)
+        FocusMacroMakerDB.marker = playerIndex
+        UpdateFocusIcon()
+    end
+end
 
-characterButton:SetScript("OnClick", function(self)
-    PrintPlayerCharacter()
-end)
-
+eventFrame:SetScript("OnEvent", OnPartyEvent)
 
 PrintDebug("FocusMacroMaker loaded.")
 
