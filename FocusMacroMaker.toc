@@ -5,6 +5,8 @@
 ## Author: TODO
 ## X-Curse-Project-ID: 999999
 ## SavedVariablesPerCharacter: FocusMacroMakerDB
-## SavedVariables:
 
+FocusMacroMaker_Utilities.lua
+FocusMacroMaker_UI.lua
+FocusMacroMaker_Events.lua
 FocusMacroMaker.lua
