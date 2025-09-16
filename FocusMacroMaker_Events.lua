@@ -1,21 +1,32 @@
 FocusMacroMaker_Events = {}
 
+local ADDON_NAME = "FocusMacroMaker"
+
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("GROUP_ROSTER_UPDATE")
 frame:RegisterEvent("READY_CHECK")
 frame:RegisterEvent("ADDON_LOADED")
+frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 local function OnEvent(self, event, ...)
     if event == "ADDON_LOADED" then
         local addonName = ...
-        if addonName == "FocusMacroMaker" then
-            -- Set UI state after addon is loaded
-            FocusMacroMaker_UI.GetReadyCheckCheckbox():SetChecked(FocusMacroMakerDB.announceOnReadyCheck)
-            --
-            FocusMacroMaker_Utilities.UpdateMarker()
+        if addonName == ADDON_NAME then
+            if FocusMacroMakerDB.autoSelectMarker then
+                FocusMacroMaker_Utilities.UpdateMarker()
+            end
+            FocusMacroMaker_UI.UpdateUIState()
+
+            -- Delay macro creation to ensure macro system is ready
+            C_Timer.After(0.1, function()
+                FocusMacroMaker_Utilities.CreateFocusMacro()
+            end)
         end
-    elseif event == "GROUP_ROSTER_UPDATE" then
-        FocusMacroMaker_Utilities.UpdateMarker()
+    elseif event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
+        if FocusMacroMakerDB.autoSelectMarker then
+            FocusMacroMaker_Utilities.UpdateMarker()
+            FocusMacroMaker_Utilities.CreateFocusMacro()
+        end
     elseif event == "READY_CHECK" then
         if FocusMacroMakerDB.announceOnReadyCheck then
             FocusMacroMaker_Utilities.SayFocusMarker()

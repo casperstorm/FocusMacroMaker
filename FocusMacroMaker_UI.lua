@@ -1,22 +1,27 @@
 FocusMacroMaker_UI = {}
 
+local NUM_MARKERS = 6
+local BUTTON_SPACING = 30
+
 -- UI Elements
 local mainFrame
-local focusIcon
-local sayButton
 local readyCheckCheckbox
+local autoSelectMarkerCheckbox
+local markerRadioButtons = {}
 
 
 local function UpdateFocusIcon()
-    if focusIcon then
-        SetRaidTargetIconTexture(focusIcon, FocusMacroMakerDB.marker)
+    for i = 1, NUM_MARKERS do
+        if markerRadioButtons[i] then
+            markerRadioButtons[i]:SetChecked(i == FocusMacroMakerDB.marker)
+        end
     end
 end
 
 local function CreateUI()
     -- Create main frame
     mainFrame = CreateFrame("Frame", "FocusMacroMakerMainFrame", UIParent, "BasicFrameTemplateWithInset")
-    mainFrame:SetSize(350, 200)
+    mainFrame:SetSize(350, 210)
     mainFrame:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
     mainFrame.TitleBg:SetHeight(30)
     mainFrame.title = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
@@ -43,39 +48,63 @@ local function CreateUI()
     end)
 
     mainFrame.mark = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    mainFrame.mark:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 15, -45)
+    mainFrame.mark:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 15, -35)
     mainFrame.mark:SetText("Your focus marker")
 
-    focusIcon = mainFrame:CreateTexture(nil, "OVERLAY")
-    focusIcon:SetSize(20, 20)
-    focusIcon:SetPoint("LEFT", mainFrame.mark, "RIGHT", 5, 0)
-    focusIcon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
-    SetRaidTargetIconTexture(focusIcon, FocusMacroMakerDB.marker)
+    for i = 1, NUM_MARKERS do
+        local radioButton = CreateFrame("CheckButton", nil, mainFrame, "UIRadioButtonTemplate")
+        radioButton:SetSize(20, 20)
+        radioButton:SetPoint("TOPLEFT", mainFrame.mark, "BOTTOMLEFT", (i-1) * BUTTON_SPACING, -10)
+        
+        local markerIcon = radioButton:CreateTexture(nil, "OVERLAY")
+        markerIcon:SetSize(16, 16)
+        markerIcon:SetPoint("TOPLEFT", radioButton, "BOTTOMLEFT", 2, -2)
+        markerIcon:SetTexture("Interface\\TargetingFrame\\UI-RaidTargetingIcons")
+        SetRaidTargetIconTexture(markerIcon, i)
+        
+        radioButton:SetScript("OnClick", function(self)
+            if self:GetChecked() then
+                FocusMacroMakerDB.marker = i
+                UpdateFocusIcon()
+                
+                autoSelectMarkerCheckbox:SetChecked(false)
+                FocusMacroMakerDB.autoSelectMarker = false
 
-    sayButton = CreateFrame("Button", nil, mainFrame, "UIPanelButtonTemplate")
-    sayButton:SetSize(150, 30)
-    sayButton:SetPoint("TOPLEFT", mainFrame.mark, "BOTTOMLEFT", 0, -10)
-    sayButton:SetText("Announce focus mark")
+                FocusMacroMaker_Utilities.CreateFocusMacro()
+            end
+        end)
+        
+        markerRadioButtons[i] = radioButton
+    end
 
-    sayButton:SetScript("OnClick", function(self)
-        -- FocusMacroMaker_Utilities.SayFocusMarker()
-        -- Create TMM macro if it doesn't exist
-        FocusMacroMaker_Utilities.CreateMacroIfMissing()
-        FocusMacroMaker_Utilities.EditCreatedMacro()
+    autoSelectMarkerCheckbox = CreateFrame("CheckButton", nil, mainFrame, "UICheckButtonTemplate")
+    autoSelectMarkerCheckbox:SetSize(20, 20)
+    autoSelectMarkerCheckbox:SetPoint("TOPLEFT", mainFrame.mark, "BOTTOMLEFT", 0, -60)
+
+    local autoSelectMarkerLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    autoSelectMarkerLabel:SetPoint("LEFT", autoSelectMarkerCheckbox, "RIGHT", 5, 0)
+    autoSelectMarkerLabel:SetText("Automatically select unique marker")
+
+    autoSelectMarkerCheckbox:SetScript("OnClick", function(self)
+        FocusMacroMakerDB.autoSelectMarker = self:GetChecked()
+
+        if FocusMacroMakerDB.autoSelectMarker then
+            FocusMacroMaker_Utilities.UpdateMarker()
+            FocusMacroMaker_Utilities.CreateFocusMacro()
+            FocusMacroMaker_UI.UpdateUIState()
+        end
     end)
 
     readyCheckCheckbox = CreateFrame("CheckButton", nil, mainFrame, "UICheckButtonTemplate")
     readyCheckCheckbox:SetSize(20, 20)
-    readyCheckCheckbox:SetPoint("TOPLEFT", sayButton, "BOTTOMLEFT", 0, -10)
+    readyCheckCheckbox:SetPoint("TOPLEFT", autoSelectMarkerCheckbox, "BOTTOMLEFT", 0, -5)
 
     local readyCheckLabel = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     readyCheckLabel:SetPoint("LEFT", readyCheckCheckbox, "RIGHT", 5, 0)
-    readyCheckLabel:SetText("Announce on ready check")
+    readyCheckLabel:SetText("Announce mark on ready check")
 
     readyCheckCheckbox:SetScript("OnClick", function(self)
         FocusMacroMakerDB.announceOnReadyCheck = self:GetChecked()
-        FocusMacroMaker_Utilities.Print("Ready check announcement " ..
-        (FocusMacroMakerDB.announceOnReadyCheck and "enabled" or "disabled"))
     end)
 
     table.insert(UISpecialFrames, "FocusMacroMakerMainFrame")
@@ -87,11 +116,19 @@ local function GetMainFrame()
     return mainFrame
 end
 
-local function GetReadyCheckCheckbox()
-    return readyCheckCheckbox
+local function UpdateUIState()
+    UpdateFocusIcon()
+    
+    if autoSelectMarkerCheckbox then
+        autoSelectMarkerCheckbox:SetChecked(FocusMacroMakerDB.autoSelectMarker)
+    end
+    
+    if readyCheckCheckbox then
+        readyCheckCheckbox:SetChecked(FocusMacroMakerDB.announceOnReadyCheck)
+    end
 end
 
 FocusMacroMaker_UI.UpdateFocusIcon = UpdateFocusIcon
 FocusMacroMaker_UI.CreateUI = CreateUI
 FocusMacroMaker_UI.GetMainFrame = GetMainFrame
-FocusMacroMaker_UI.GetReadyCheckCheckbox = GetReadyCheckCheckbox
+FocusMacroMaker_UI.UpdateUIState = UpdateUIState

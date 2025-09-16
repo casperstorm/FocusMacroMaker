@@ -2,7 +2,6 @@ FocusMacroMaker_Utilities = {}
 
 local macroName = "FocusMacroMaker"
 
--- Define functions with their original names
 local function Print(message)    
     print("|cFF00FF00[FocusMacroMaker]|r " .. message)
 end
@@ -16,7 +15,6 @@ local function PlayerName()
     return (playerName .. "-" .. playerRealm)
 end
 
--- Function to say focus marker in chat
 local function SayFocusMarker()
     local text = "My focus mark is {rt" .. FocusMacroMakerDB.marker .. "}"
     C_ChatInfo.SendChatMessage(text, "SAY")
@@ -25,10 +23,8 @@ end
 local function SortPartyMembers()
     local names = {}
 
-    -- Add player's own name
     table.insert(names, PlayerName())
 
-    -- Add party members
     for i = 1, GetNumSubgroupMembers() do
         local unit = "party" .. i
         if UnitExists(unit) then
@@ -45,9 +41,8 @@ local function SortPartyMembers()
     return names
 end
 
--- Function to update the marker
 local function UpdateMarker()
-    local player = FocusMacroMaker_Utilities.PlayerName();
+    local player = FocusMacroMaker_Utilities.PlayerName()
     local names = FocusMacroMaker_Utilities.SortPartyMembers()
     local playerIndex = FocusMacroMaker_Utilities.IndexOf(names, player)
 
@@ -55,15 +50,16 @@ local function UpdateMarker()
     FocusMacroMaker_UI.UpdateFocusIcon()
 end
 
-
-local function CreateMacroIfMissing()
+local function CreateFocusMacro()
     if not GetMacroInfo(macroName) then
-        CreateMacro(macroName, "INV_Misc_QuestionMark", "", false)
+        local success = CreateMacro(macroName, "INV_Misc_QuestionMark", "", false)
+        if not success then
+            Print("Failed to create macro: " .. macroName)
+            return
+        end
     end
-end
 
-local function EditCreatedMacro()
-    local content = "test test"
+    local content = "/focus [@mouseover,exists,nodead][exists]\n/run if not GetRaidTargetIndex(\"focus\") then SetRaidTarget(\"focus\"," .. FocusMacroMakerDB.marker .. ") end"
     EditMacro(macroName, macroName, nil, content)
 end
 
@@ -73,6 +69,5 @@ FocusMacroMaker_Utilities.IndexOf = IndexOf
 FocusMacroMaker_Utilities.PlayerName = PlayerName
 FocusMacroMaker_Utilities.SayFocusMarker = SayFocusMarker
 FocusMacroMaker_Utilities.SortPartyMembers = SortPartyMembers
-FocusMacroMaker_Utilities.CreateMacroIfMissing = CreateMacroIfMissing
-FocusMacroMaker_Utilities.EditCreatedMacro = EditCreatedMacro
+FocusMacroMaker_Utilities.CreateFocusMacro = CreateFocusMacro
 FocusMacroMaker_Utilities.UpdateMarker = UpdateMarker

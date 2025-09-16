@@ -1,10 +1,13 @@
 FocusMacroMaker = {}
 
--- State
+local DEFAULT_MARKER = 1 -- Star
+
+-- Initialize saved variables
 if not FocusMacroMakerDB then
     FocusMacroMakerDB = {
-        marker = 1, -- Default to marker 1 (Star)
-        announceOnReadyCheck = false
+        marker = DEFAULT_MARKER,
+        announceOnReadyCheck = true,
+        autoSelectMarker = true
     }
 end
 -- Initialize UI
@@ -12,6 +15,7 @@ FocusMacroMaker_UI.CreateUI()
 
 -- Initialize events
 FocusMacroMaker_Events.InitializeEvents()
+
 -- Slash commands
 SLASH_FOCUSMACROMAKER1 = "/focusmacromaker"
 SLASH_FOCUSMACROMAKER2 = "/fmm"
