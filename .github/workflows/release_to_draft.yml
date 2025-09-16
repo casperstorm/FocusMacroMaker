@@ -1,0 +1,35 @@
+name: Release to Draft
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Specify the release tag to create (e.g., v1.0.0)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Create Draft Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Package Project
+        run: |
+          zip -r FocusMacroMaker-${{ github.event.inputs.tag }}.zip FocusMacroMaker
+
+      - name: Create Draft Release and Upload Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.tag }}
+          name: "Release ${{ github.event.inputs.tag }}"
+          draft: true
+          prerelease: false
+          files: FocusMacroMaker-${{ github.event.inputs.tag }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
