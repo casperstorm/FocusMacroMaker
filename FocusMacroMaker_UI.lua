@@ -42,12 +42,8 @@ local function CreateUI()
         PlaySound(808)
     end)
 
-    mainFrame.guide = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    mainFrame.guide:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 15, -45)
-    mainFrame.guide:SetText("Guide: Create a macro called TMM. Leave it empty.")
-
     mainFrame.mark = mainFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    mainFrame.mark:SetPoint("TOPLEFT", mainFrame.guide, "BOTTOMLEFT", 0, -20)
+    mainFrame.mark:SetPoint("TOPLEFT", mainFrame, "TOPLEFT", 15, -45)
     mainFrame.mark:SetText("Your focus marker")
 
     focusIcon = mainFrame:CreateTexture(nil, "OVERLAY")
@@ -62,7 +58,10 @@ local function CreateUI()
     sayButton:SetText("Announce focus mark")
 
     sayButton:SetScript("OnClick", function(self)
-        FocusMacroMaker_Utilities.SayFocusMarker()
+        -- FocusMacroMaker_Utilities.SayFocusMarker()
+        -- Create TMM macro if it doesn't exist
+        FocusMacroMaker_Utilities.CreateMacroIfMissing()
+        FocusMacroMaker_Utilities.EditCreatedMacro()
     end)
 
     readyCheckCheckbox = CreateFrame("CheckButton", nil, mainFrame, "UICheckButtonTemplate")
@@ -75,7 +74,8 @@ local function CreateUI()
 
     readyCheckCheckbox:SetScript("OnClick", function(self)
         FocusMacroMakerDB.announceOnReadyCheck = self:GetChecked()
-        FocusMacroMaker_Utilities.Print("Ready check announcement " .. (FocusMacroMakerDB.announceOnReadyCheck and "enabled" or "disabled"))
+        FocusMacroMaker_Utilities.Print("Ready check announcement " ..
+        (FocusMacroMakerDB.announceOnReadyCheck and "enabled" or "disabled"))
     end)
 
     table.insert(UISpecialFrames, "FocusMacroMakerMainFrame")

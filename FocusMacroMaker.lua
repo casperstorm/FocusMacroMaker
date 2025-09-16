@@ -10,16 +10,6 @@ end
 -- Initialize UI
 FocusMacroMaker_UI.CreateUI()
 
--- Function to update the marker
-function FocusMacroMaker.UpdateMarker()
-    local player = FocusMacroMaker_Utilities.PlayerName();
-    local names = FocusMacroMaker_Utilities.SortPartyMembers()
-    local playerIndex = FocusMacroMaker_Utilities.IndexOf(names, player)
-
-    FocusMacroMakerDB.marker = playerIndex
-    FocusMacroMaker_UI.UpdateFocusIcon()
-end
-
 -- Initialize events
 FocusMacroMaker_Events.InitializeEvents()
 -- Slash commands

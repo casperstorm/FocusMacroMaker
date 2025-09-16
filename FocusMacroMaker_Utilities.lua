@@ -1,5 +1,7 @@
 FocusMacroMaker_Utilities = {}
 
+local macroName = "FocusMacroMaker"
+
 -- Define functions with their original names
 local function Print(message)    
     print("|cFF00FF00[FocusMacroMaker]|r " .. message)
@@ -45,12 +47,24 @@ end
 
 -- Function to update the marker
 local function UpdateMarker()
-    local player = PlayerName();
-    local names = SortPartyMembers()
-    local playerIndex = IndexOf(names, player)
+    local player = FocusMacroMaker_Utilities.PlayerName();
+    local names = FocusMacroMaker_Utilities.SortPartyMembers()
+    local playerIndex = FocusMacroMaker_Utilities.IndexOf(names, player)
 
     FocusMacroMakerDB.marker = playerIndex
     FocusMacroMaker_UI.UpdateFocusIcon()
+end
+
+
+local function CreateMacroIfMissing()
+    if not GetMacroInfo(macroName) then
+        CreateMacro(macroName, "INV_Misc_QuestionMark", "", false)
+    end
+end
+
+local function EditCreatedMacro()
+    local content = "test test"
+    EditMacro(macroName, macroName, nil, content)
 end
 
 
@@ -59,4 +73,6 @@ FocusMacroMaker_Utilities.IndexOf = IndexOf
 FocusMacroMaker_Utilities.PlayerName = PlayerName
 FocusMacroMaker_Utilities.SayFocusMarker = SayFocusMarker
 FocusMacroMaker_Utilities.SortPartyMembers = SortPartyMembers
+FocusMacroMaker_Utilities.CreateMacroIfMissing = CreateMacroIfMissing
+FocusMacroMaker_Utilities.EditCreatedMacro = EditCreatedMacro
 FocusMacroMaker_Utilities.UpdateMarker = UpdateMarker

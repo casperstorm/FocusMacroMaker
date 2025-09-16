@@ -11,11 +11,11 @@ local function OnEvent(self, event, ...)
         if addonName == "FocusMacroMaker" then
             -- Set UI state after addon is loaded
             FocusMacroMaker_UI.GetReadyCheckCheckbox():SetChecked(FocusMacroMakerDB.announceOnReadyCheck)
-            -- Refresh marker
-            FocusMacroMaker.UpdateMarker()
+            --
+            FocusMacroMaker_Utilities.UpdateMarker()
         end
     elseif event == "GROUP_ROSTER_UPDATE" then
-        FocusMacroMaker.UpdateMarker()
+        FocusMacroMaker_Utilities.UpdateMarker()
     elseif event == "READY_CHECK" then
         if FocusMacroMakerDB.announceOnReadyCheck then
             FocusMacroMaker_Utilities.SayFocusMarker()
