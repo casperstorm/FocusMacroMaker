@@ -12,14 +12,13 @@ local function OnEvent(self, event, ...)
     if event == "ADDON_LOADED" then
         local addonName = ...
         if addonName == ADDON_NAME then
-            if FocusMacroMakerDB.autoSelectMarker then
-                FocusMacroMaker_Utilities.UpdateMarker()
-            end
-            FocusMacroMaker_UI.UpdateUIState()
-
-            -- Delay macro creation to ensure macro system is ready
             C_Timer.After(0.1, function()
+                if FocusMacroMakerDB.autoSelectMarker then
+                    FocusMacroMaker_Utilities.UpdateMarker()
+                end
+
                 FocusMacroMaker_Utilities.CreateFocusMacro()
+                FocusMacroMaker_UI.UpdateUIState()
             end)
         end
     elseif event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
